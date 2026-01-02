@@ -1,0 +1,379 @@
+openapi: 3.0.3
+info:
+  title: User and Task API
+  version: 1.0.0
+  description: API for user registration
+paths:
+  /api/v1/users:
+    post:
+      summary: Create a new user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreateSuccessResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreateValidationError'
+
+
+    get:
+      summary: Get list of users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+
+  /api/v1/tasks:
+    post:
+      summary: Create a task
+      tags: [Tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreateRequest'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSuccessResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskValidationError'
+
+    get:
+      summary: List tasks
+      tags: [Tasks]
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [Pending, In Progress, Completed]
+          example: In Progress
+      responses:
+        '200':
+          description: Task list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskListResponse'
+
+  /api/v1/tasks/{id}:
+    get:
+      summary: Get task by ID
+      tags: [Tasks]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetailResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskNotFoundError'
+
+    put:
+      summary: Update a task
+      tags: [Tasks]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreateRequest'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskUpdateSuccessResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskValidationError'
+
+
+    delete:
+      summary: Delete a task
+      tags: [Tasks]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDeleteSuccessResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskNotFoundError'
+
+
+
+
+
+              
+components:
+  examples:
+    BorrowReturnError1:
+      summary: Validation Error1
+      value:
+        error: true
+        msg: Book already returned
+    BorrowReturnError2:
+      summary: Validation Error2
+      value:
+        error: true
+        msg: Not your borrow record
+        
+  schemas:
+    UserCreateRequest:
+      type: object
+      required:
+        - email
+        - username
+      properties:
+        email:
+          type: string
+          format: email
+          example: 1234@gmail.com
+        username:
+          type: string
+          example: arun
+
+    UserCreateSuccessResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: false
+        msg:
+          type: string
+          example: User created successfully.
+
+    UserCreateValidationError:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: true
+        errors:
+          type: object
+          properties:
+            username:
+              type: string
+              example: user with this username already exists.
+            email:
+              type: string
+              example: user with this email already exists.
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: dhinesh
+        email:
+          type: string
+          format: email
+          example: 123@gmail.com
+
+    UserListResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            users:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 4
+        title:
+          type: string
+          example: task3
+        description:
+          type: string
+          example: desc
+        status:
+          type: string
+          enum: [Pending, In Progress, Completed]
+          example: In Progress
+        created_at:
+          type: string
+          format: date-time
+          example: 2026-01-02T18:02:48.908865Z
+        user:
+          type: integer
+          example: 1
+
+    TaskCreateRequest:
+      type: object
+      required:
+        - title
+        - description
+        - status
+        - user
+      properties:
+        title:
+          type: string
+          example: task3
+        description:
+          type: string
+          example: desc
+        status:
+          type: string
+          enum: [Pending, In Progress, Completed]
+          example: In Progress
+        user:
+          type: integer
+          example: 1
+
+    TaskSuccessResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: false
+        msg:
+          type: string
+          example: Task created successfully.
+
+    TaskUpdateSuccessResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: false
+        msg:
+          type: string
+          example: Task updated successfully.
+
+    TaskDeleteSuccessResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: false
+        msg:
+          type: string
+          example: Task deleted successfully.
+
+    TaskValidationError:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: true
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            description: This field may not be blank.
+            status: '"In Progresss" is not a valid choice.'
+            user: 'Invalid pk "4" - object does not exist.'
+
+    TaskNotFoundError:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: true
+        msg:
+          type: string
+          example: Task not found.
+
+    TaskListResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            task:
+              type: array
+              items:
+                $ref: '#/components/schemas/Task'
+
+    TaskDetailResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            item:
+              $ref: '#/components/schemas/Task'
+
+
+
+
